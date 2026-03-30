@@ -6,4 +6,7 @@ __pycache__/
 *.pyo
 *.pyd   
 
-dags/__pycache__/
+dags/__pycache__/8
+
+logs/*
+dags/logs/*
