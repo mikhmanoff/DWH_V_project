@@ -12,8 +12,8 @@ clickhouse:
   database: default
 
 settings:
-  csv_backup_enabled: true
-  csv_retention_days: 10
+  backup_enabled: true
+  backup_retention_days: 10
   batch_size: 50000
 
 # Схемы и их расписания

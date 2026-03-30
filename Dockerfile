@@ -12,4 +12,5 @@ RUN pip install --no-cache-dir \
     psycopg2-binary==2.9.9 \
     pymssql==2.2.11 \
     pymysql==1.1.0 \
-    PyYAML==6.0.1
+    PyYAML==6.0.1 \
+    pyarrow==15.0.0
