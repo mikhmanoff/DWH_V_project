@@ -1,1 +1,9 @@
-dags/backups/
+dags/backups/*
+
+ignore python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd   
+
+dags/__pycache__/
