@@ -16,38 +16,21 @@ settings:
   csv_retention_days: 10
   batch_size: 50000
 
-# Маппинг схема -> company_id
-companies:
-  finboon: "company_001"
-  variant: "company_002"
+# Схемы и их расписания
+schemas:
+  finboon:
+    company_id: "company_001"
+    schedule: "0 2 * * *"
+  variant:
+    company_id: "company_002"
+    schedule: "0 3 * * *"
 
+# Таблицы описываются ОДИН раз — реплицируются на все схемы
 tables:
-  # ===== FINBOON =====
-  - source_schema: finboon
-    source_table: client_contracts
-    target_table: client_contracts
+  - table: client_contracts
     primary_key: id
-    schedule: "0 2 * * *"
-    description: "Контракты Finboon"
+    description: "Контракты"
 
-  - source_schema: finboon
-    source_table: clients
-    target_table: clients
+  - table: clients
     primary_key: id
-    schedule: "0 2 * * *"
-    description: "Клиенты Finboon"
-
-  # ===== VARIANT =====
-  - source_schema: variant
-    source_table: client_contracts
-    target_table: client_contracts
-    primary_key: id
-    schedule: "0 3 * * *"
-    description: "Контракты Variant"
-
-  - source_schema: variant
-    source_table: clients
-    target_table: clients
-    primary_key: id
-    schedule: "0 3 * * *"
-    description: "Клиенты Variant"
+    description: "Клиенты"

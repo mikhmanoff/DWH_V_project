@@ -4,6 +4,7 @@ Universal ETL DAG Factory
 - Разделение на Extract, Transform, Load
 - CSV-бэкапы с хранением 10 дней
 - Системные колонки: _source_schema, _company_id, _loaded_at, _etl_job_id, _row_hash
+- Конфиг: схемы и таблицы описываются по одному разу, DAG'и генерируются автоматически
 """
 
 from airflow import DAG
@@ -23,13 +24,59 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def expand_config(raw_config: dict) -> dict:
+    """
+    Разворачивает компактный конфиг (schemas + tables) в плоский список table_config'ов.
+    
+    Поддерживает:
+      - schemas_only: [finboon]  — таблица только для указанных схем
+      - schedule на уровне таблицы переопределяет schedule схемы
+      - target_table переопределяет имя целевой таблицы (по умолчанию = table)
+    """
+    schemas = raw_config.get('schemas', {})
+    
+    # Если schemas нет — значит старый формат, возвращаем как есть
+    if not schemas:
+        return raw_config
+    
+    flat_tables = []
+    
+    for table_def in raw_config.get('tables', []):
+        # Какие схемы использовать
+        allowed = table_def.get('schemas_only', list(schemas.keys()))
+        
+        for schema_name in allowed:
+            if schema_name not in schemas:
+                logger.warning(f"Схема '{schema_name}' не найдена в schemas, пропускаю")
+                continue
+            
+            schema_conf = schemas[schema_name]
+            
+            flat_tables.append({
+                'source_schema': schema_name,
+                'source_table': table_def['table'],
+                'target_table': table_def.get('target_table', table_def['table']),
+                'primary_key': table_def['primary_key'],
+                'schedule': table_def.get('schedule', schema_conf.get('schedule', '@daily')),
+                'description': f"{table_def.get('description', table_def['table'])} ({schema_name})",
+            })
+    
+    # Строим companies из schemas
+    raw_config['companies'] = {
+        name: conf['company_id'] for name, conf in schemas.items()
+    }
+    raw_config['tables'] = flat_tables
+    
+    return raw_config
+
+
 def extract(table_config: dict, **context) -> dict:
     """Extract: Выгрузка данных из источника"""
     from etl.utils import load_config, generate_run_id
     from etl.connections import source_connection
     from etl.extractor import DataExtractor
     
-    config = load_config(CONFIG_PATH)
+    config = expand_config(load_config(CONFIG_PATH))
     settings = config.get('settings', {})
     
     source_schema = table_config['source_schema']
@@ -111,7 +158,7 @@ def transform(table_config: dict, **context) -> dict:
         logger.info("Нет данных для трансформации")
         return {'rows_transformed': 0, 'columns_meta': []}
     
-    config = load_config(CONFIG_PATH)
+    config = expand_config(load_config(CONFIG_PATH))
     
     logger.info(f"=== TRANSFORM Start ===")
     logger.info(f"Job ID: {extract_result['job_id']}")
@@ -170,7 +217,7 @@ def load(table_config: dict, **context) -> dict:
         logger.info("Нет данных для загрузки")
         return {'rows_loaded': 0}
     
-    config = load_config(CONFIG_PATH)
+    config = expand_config(load_config(CONFIG_PATH))
     settings = config.get('settings', {})
     companies = config.get('companies', {})
     
@@ -292,11 +339,11 @@ def create_dag(table_config: dict, default_args: dict) -> DAG:
     return dag
 
 
-# === Создание DAG'ов ===
+# === Загрузка конфига и создание DAG'ов ===
 
 try:
     from etl.utils import load_config
-    config = load_config(CONFIG_PATH)
+    config = expand_config(load_config(CONFIG_PATH))
 except Exception as e:
     logger.error(f"Ошибка загрузки конфига: {e}")
     config = {'tables': []}
