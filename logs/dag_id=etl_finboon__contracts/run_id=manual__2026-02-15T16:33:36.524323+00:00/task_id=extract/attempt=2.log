@@ -1,0 +1,48 @@
+[2026-02-15T16:34:26.416+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: etl_finboon__contracts.extract manual__2026-02-15T16:33:36.524323+00:00 [queued]>
+[2026-02-15T16:34:26.429+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: etl_finboon__contracts.extract manual__2026-02-15T16:33:36.524323+00:00 [queued]>
+[2026-02-15T16:34:26.430+0000] {taskinstance.py:2170} INFO - Starting attempt 2 of 3
+[2026-02-15T16:34:26.453+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): extract> on 2026-02-15 16:33:36.524323+00:00
+[2026-02-15T16:34:26.461+0000] {standard_task_runner.py:60} INFO - Started process 299 to run task
+[2026-02-15T16:34:26.468+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'etl_finboon__contracts', 'extract', 'manual__2026-02-15T16:33:36.524323+00:00', '--job-id', '31', '--raw', '--subdir', 'DAGS_FOLDER/universal_etl_factory.py', '--cfg-path', '/tmp/tmp03a5mn3v']
+[2026-02-15T16:34:26.472+0000] {standard_task_runner.py:88} INFO - Job 31: Subtask extract
+[2026-02-15T16:34:26.580+0000] {task_command.py:423} INFO - Running <TaskInstance: etl_finboon__contracts.extract manual__2026-02-15T16:33:36.524323+00:00 [running]> on host 544250c3cab2
+[2026-02-15T16:34:26.716+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='etl_finboon__contracts' AIRFLOW_CTX_TASK_ID='extract' AIRFLOW_CTX_EXECUTION_DATE='2026-02-15T16:33:36.524323+00:00' AIRFLOW_CTX_TRY_NUMBER='2' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-02-15T16:33:36.524323+00:00'
+[2026-02-15T16:34:26.730+0000] {utils.py:16} INFO - Конфигурация загружена: /opt/***/dags/config/tables.yaml
+[2026-02-15T16:34:26.731+0000] {universal_etl_factory.py:43} INFO - === EXTRACT Start ===
+[2026-02-15T16:34:26.731+0000] {universal_etl_factory.py:44} INFO - Source: finboon.contracts
+[2026-02-15T16:34:26.732+0000] {universal_etl_factory.py:45} INFO - Job ID: etl_finboon__contracts_bfddde5b
+[2026-02-15T16:34:26.771+0000] {connections.py:51} INFO - Подключено к mariadb://10.0.20.2/variant
+[2026-02-15T16:34:26.772+0000] {extractor.py:30} INFO - Выгрузка: finboon.contracts
+[2026-02-15T16:34:26.778+0000] {taskinstance.py:2698} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 199, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 216, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/universal_etl_factory.py", line 54, in extract
+    columns, rows = extractor.extract(
+  File "/opt/airflow/dags/etl/extractor.py", line 31, in extract
+    cursor.execute(query)
+  File "/home/airflow/.local/lib/python3.8/site-packages/pymysql/cursors.py", line 153, in execute
+    result = self._query(query)
+  File "/home/airflow/.local/lib/python3.8/site-packages/pymysql/cursors.py", line 322, in _query
+    conn.query(q)
+  File "/home/airflow/.local/lib/python3.8/site-packages/pymysql/connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "/home/airflow/.local/lib/python3.8/site-packages/pymysql/connections.py", line 822, in _read_query_result
+    result.read()
+  File "/home/airflow/.local/lib/python3.8/site-packages/pymysql/connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "/home/airflow/.local/lib/python3.8/site-packages/pymysql/connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+  File "/home/airflow/.local/lib/python3.8/site-packages/pymysql/protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/home/airflow/.local/lib/python3.8/site-packages/pymysql/err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'finboon.contracts' doesn't exist")
+[2026-02-15T16:34:26.801+0000] {taskinstance.py:1138} INFO - Marking task as UP_FOR_RETRY. dag_id=etl_finboon__contracts, task_id=extract, execution_date=20260215T163336, start_date=20260215T163426, end_date=20260215T163426
+[2026-02-15T16:34:26.824+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 31 for task extract ((1146, "Table 'finboon.contracts' doesn't exist"); 299)
+[2026-02-15T16:34:26.841+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2026-02-15T16:34:26.885+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check

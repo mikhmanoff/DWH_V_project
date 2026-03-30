@@ -1,0 +1,63 @@
+[2026-02-01T21:21:53.127+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: etl_finboon__clients.extract_and_load scheduled__2026-01-31T02:00:00+00:00 [queued]>
+[2026-02-01T21:21:53.136+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: etl_finboon__clients.extract_and_load scheduled__2026-01-31T02:00:00+00:00 [queued]>
+[2026-02-01T21:21:53.137+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 3
+[2026-02-01T21:21:53.150+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): extract_and_load> on 2026-01-31 02:00:00+00:00
+[2026-02-01T21:21:53.155+0000] {standard_task_runner.py:60} INFO - Started process 214 to run task
+[2026-02-01T21:21:53.160+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'etl_finboon__clients', 'extract_and_load', 'scheduled__2026-01-31T02:00:00+00:00', '--job-id', '8', '--raw', '--subdir', 'DAGS_FOLDER/universal_etl_factory.py', '--cfg-path', '/tmp/tmppy_vt0ly']
+[2026-02-01T21:21:53.163+0000] {standard_task_runner.py:88} INFO - Job 8: Subtask extract_and_load
+[2026-02-01T21:21:53.240+0000] {task_command.py:423} INFO - Running <TaskInstance: etl_finboon__clients.extract_and_load scheduled__2026-01-31T02:00:00+00:00 [running]> on host 965f6dc12fe6
+[2026-02-01T21:21:53.376+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='etl_finboon__clients' AIRFLOW_CTX_TASK_ID='extract_and_load' AIRFLOW_CTX_EXECUTION_DATE='2026-01-31T02:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-01-31T02:00:00+00:00'
+[2026-02-01T21:21:53.392+0000] {utils.py:16} INFO - Конфигурация загружена: /opt/***/dags/config/tables.yaml
+[2026-02-01T21:21:53.393+0000] {universal_etl_factory.py:49} INFO - === ETL Start ===
+[2026-02-01T21:21:53.393+0000] {universal_etl_factory.py:50} INFO - Source: finboon.clients
+[2026-02-01T21:21:53.393+0000] {universal_etl_factory.py:51} INFO - Target: clients
+[2026-02-01T21:21:53.393+0000] {universal_etl_factory.py:52} INFO - Company: company_001
+[2026-02-01T21:21:53.394+0000] {universal_etl_factory.py:53} INFO - Job ID: etl_finboon__clients_c3e1800a
+[2026-02-01T21:21:53.435+0000] {connections.py:51} INFO - Подключено к mariadb://10.0.20.2/variant
+[2026-02-01T21:21:53.624+0000] {connections.py:82} INFO - Подключено к ClickHouse: clickhouse
+[2026-02-01T21:21:53.624+0000] {extractor.py:30} INFO - Выгрузка: finboon.clients
+[2026-02-01T21:22:18.141+0000] {extractor.py:36} INFO - Извлечено 219795 строк, 19 колонок
+[2026-02-01T21:22:19.965+0000] {extractor.py:56} INFO - CSV сохранён: /opt/***/dags/backups/finboon__clients_20260201_212218_etl_finboon__clients_c3e1800a.csv (219795 строк)
+[2026-02-01T21:22:19.977+0000] {type_mapper.py:69} INFO - Проанализировано 19 колонок
+[2026-02-01T21:22:19.978+0000] {connection.py:407} WARNING - Failed to connect to clickhouse:9123
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/connection.py", line 395, in connect
+    return self._init_connection(host, port)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/connection.py", line 325, in _init_connection
+    self.socket = self._create_socket(host, port)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/connection.py", line 297, in _create_socket
+    raise err
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/connection.py", line 288, in _create_socket
+    sock.connect(sa)
+ConnectionRefusedError: [Errno 111] Connection refused
+[2026-02-01T21:22:19.984+0000] {taskinstance.py:2698} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 199, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 216, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/universal_etl_factory.py", line 102, in run_etl
+    loader.create_table(
+  File "/opt/airflow/dags/etl/loader.py", line 61, in create_table
+    self.connection.execute(ddl)
+  File "/opt/airflow/dags/etl/connections.py", line 88, in execute
+    return self._client.execute(query)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/client.py", line 361, in execute
+    with self.disconnect_on_error(query, settings):
+  File "/usr/local/lib/python3.8/contextlib.py", line 113, in __enter__
+    return next(self.gen)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/client.py", line 305, in disconnect_on_error
+    self.establish_connection(settings)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/client.py", line 292, in establish_connection
+    self.connection.force_connect()
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/connection.py", line 254, in force_connect
+    self.connect()
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/connection.py", line 416, in connect
+    raise err
+clickhouse_driver.errors.NetworkError: Code: 210. Connection refused (clickhouse:9123)
+[2026-02-01T21:22:20.013+0000] {taskinstance.py:1138} INFO - Marking task as UP_FOR_RETRY. dag_id=etl_finboon__clients, task_id=extract_and_load, execution_date=20260131T020000, start_date=20260201T212153, end_date=20260201T212220
+[2026-02-01T21:22:20.043+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 8 for task extract_and_load (Code: 210. Connection refused (clickhouse:9123); 214)
+[2026-02-01T21:22:20.086+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2026-02-01T21:22:20.124+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check

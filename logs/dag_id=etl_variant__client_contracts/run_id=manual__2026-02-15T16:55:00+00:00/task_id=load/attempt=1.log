@@ -1,0 +1,55 @@
+[2026-02-15T16:58:02.173+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: etl_variant__client_contracts.load manual__2026-02-15T16:55:00+00:00 [queued]>
+[2026-02-15T16:58:02.191+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: etl_variant__client_contracts.load manual__2026-02-15T16:55:00+00:00 [queued]>
+[2026-02-15T16:58:02.192+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 3
+[2026-02-15T16:58:02.220+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): load> on 2026-02-15 16:55:00+00:00
+[2026-02-15T16:58:02.230+0000] {standard_task_runner.py:60} INFO - Started process 274 to run task
+[2026-02-15T16:58:02.236+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'etl_variant__client_contracts', 'load', 'manual__2026-02-15T16:55:00+00:00', '--job-id', '79', '--raw', '--subdir', 'DAGS_FOLDER/universal_etl_factory.py', '--cfg-path', '/tmp/tmpqa6qm3p0']
+[2026-02-15T16:58:02.240+0000] {standard_task_runner.py:88} INFO - Job 79: Subtask load
+[2026-02-15T16:58:02.316+0000] {task_command.py:423} INFO - Running <TaskInstance: etl_variant__client_contracts.load manual__2026-02-15T16:55:00+00:00 [running]> on host 544250c3cab2
+[2026-02-15T16:58:02.447+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='etl_variant__client_contracts' AIRFLOW_CTX_TASK_ID='load' AIRFLOW_CTX_EXECUTION_DATE='2026-02-15T16:55:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-02-15T16:55:00+00:00'
+[2026-02-15T16:58:02.485+0000] {utils.py:16} INFO - Конфигурация загружена: /opt/***/dags/config/tables.yaml
+[2026-02-15T16:58:02.486+0000] {universal_etl_factory.py:183} INFO - === LOAD Start ===
+[2026-02-15T16:58:02.486+0000] {universal_etl_factory.py:184} INFO - Target: client_contracts
+[2026-02-15T16:58:02.487+0000] {universal_etl_factory.py:185} INFO - Company: company_002
+[2026-02-15T16:58:02.487+0000] {universal_etl_factory.py:186} INFO - Job ID: etl_variant__client_contracts_7d841c76
+[2026-02-15T16:58:06.762+0000] {connections.py:82} INFO - Подключено к ClickHouse: clickhouse
+[2026-02-15T16:58:06.784+0000] {loader.py:51} INFO - Таблица client_contracts готова
+[2026-02-15T16:58:06.793+0000] {loader.py:60} INFO - Удалены данные схемы variant из client_contracts
+[2026-02-15T16:58:10.105+0000] {taskinstance.py:2698} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 199, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 216, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/universal_etl_factory.py", line 213, in load
+    loaded = loader.load_data_transformed(
+  File "/opt/airflow/dags/etl/loader.py", line 142, in load_data_transformed
+    self.connection.execute(
+  File "/opt/airflow/dags/etl/connections.py", line 87, in execute
+    return self._client.execute(query, data)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/client.py", line 367, in execute
+    rv = self.process_insert_query(
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/client.py", line 598, in process_insert_query
+    rv = self.send_data(sample_block, data,
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/client.py", line 651, in send_data
+    self.connection.send_data(block)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/connection.py", line 667, in send_data
+    self.block_out.write(block)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/streams/native.py", line 43, in write
+    write_column(self.context, col_name, col_type, items,
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/columns/service.py", line 167, in write_column
+    column.write_data(items, buf)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/columns/base.py", line 145, in write_data
+    self._write_data(items, buf)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/columns/base.py", line 149, in _write_data
+    self.write_items(prepared, buf)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_driver/columns/stringcolumn.py", line 18, in write_items
+    buf.write_strings(items, encoding=self.encoding)
+  File "clickhouse_driver/bufferedwriter.pyx", line 54, in clickhouse_driver.bufferedwriter.BufferedWriter.write_strings
+AttributeError: 'NoneType' object has no attribute 'encode'
+[2026-02-15T16:58:10.120+0000] {taskinstance.py:1138} INFO - Marking task as UP_FOR_RETRY. dag_id=etl_variant__client_contracts, task_id=load, execution_date=20260215T165500, start_date=20260215T165802, end_date=20260215T165810
+[2026-02-15T16:58:10.140+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 79 for task load ('NoneType' object has no attribute 'encode'; 274)
+[2026-02-15T16:58:10.263+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2026-02-15T16:58:10.304+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check

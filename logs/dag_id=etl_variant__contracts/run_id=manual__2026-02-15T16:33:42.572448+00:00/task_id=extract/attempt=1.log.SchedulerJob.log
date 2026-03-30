@@ -1,0 +1,1 @@
+[2026-02-15T16:38:57.400+0000] {scheduler_job_runner.py:781} ERROR - Executor reports task instance <TaskInstance: etl_variant__contracts.extract manual__2026-02-15T16:33:42.572448+00:00 [queued]> finished (failed) although the task says it's queued. (Info: None) Was the task killed externally?

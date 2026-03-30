@@ -1,0 +1,53 @@
+source_db:
+  type: mariadb
+  host: 10.0.20.2
+  port: 3306
+  database: variant
+  user: readonly_user
+  password: "Qw@t3m@l@7%^&"
+
+clickhouse:
+  host: clickhouse
+  port: 9000
+  database: default
+
+settings:
+  csv_backup_enabled: true
+  csv_retention_days: 10
+  batch_size: 50000
+
+# Маппинг схема -> company_id
+companies:
+  finboon: "company_001"
+  variant: "company_002"
+
+tables:
+  # ===== FINBOON =====
+  - source_schema: finboon
+    source_table: client_contracts
+    target_table: client_contracts
+    primary_key: id
+    schedule: "0 2 * * *"
+    description: "Контракты Finboon"
+
+  - source_schema: finboon
+    source_table: clients
+    target_table: clients
+    primary_key: id
+    schedule: "0 2 * * *"
+    description: "Клиенты Finboon"
+
+  # ===== VARIANT =====
+  - source_schema: variant
+    source_table: client_contracts
+    target_table: client_contracts
+    primary_key: id
+    schedule: "0 3 * * *"
+    description: "Контракты Variant"
+
+  - source_schema: variant
+    source_table: clients
+    target_table: clients
+    primary_key: id
+    schedule: "0 3 * * *"
+    description: "Клиенты Variant"

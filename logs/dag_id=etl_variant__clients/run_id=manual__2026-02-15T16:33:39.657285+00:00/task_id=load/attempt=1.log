@@ -1,0 +1,35 @@
+[2026-02-15T16:44:39.925+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: etl_variant__clients.load manual__2026-02-15T16:33:39.657285+00:00 [queued]>
+[2026-02-15T16:44:39.939+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: etl_variant__clients.load manual__2026-02-15T16:33:39.657285+00:00 [queued]>
+[2026-02-15T16:44:39.940+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 3
+[2026-02-15T16:44:39.961+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): load> on 2026-02-15 16:33:39.657285+00:00
+[2026-02-15T16:44:39.969+0000] {standard_task_runner.py:60} INFO - Started process 459 to run task
+[2026-02-15T16:44:39.977+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'etl_variant__clients', 'load', 'manual__2026-02-15T16:33:39.657285+00:00', '--job-id', '60', '--raw', '--subdir', 'DAGS_FOLDER/universal_etl_factory.py', '--cfg-path', '/tmp/tmpijdb1v4y']
+[2026-02-15T16:44:39.981+0000] {standard_task_runner.py:88} INFO - Job 60: Subtask load
+[2026-02-15T16:44:40.076+0000] {task_command.py:423} INFO - Running <TaskInstance: etl_variant__clients.load manual__2026-02-15T16:33:39.657285+00:00 [running]> on host 544250c3cab2
+[2026-02-15T16:44:40.238+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='etl_variant__clients' AIRFLOW_CTX_TASK_ID='load' AIRFLOW_CTX_EXECUTION_DATE='2026-02-15T16:33:39.657285+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-02-15T16:33:39.657285+00:00'
+[2026-02-15T16:44:40.295+0000] {utils.py:16} INFO - Конфигурация загружена: /opt/***/dags/config/tables.yaml
+[2026-02-15T16:44:40.296+0000] {universal_etl_factory.py:183} INFO - === LOAD Start ===
+[2026-02-15T16:44:40.296+0000] {universal_etl_factory.py:184} INFO - Target: clients
+[2026-02-15T16:44:40.296+0000] {universal_etl_factory.py:185} INFO - Company: company_002
+[2026-02-15T16:44:40.296+0000] {universal_etl_factory.py:186} INFO - Job ID: etl_variant__clients_0e08633b
+[2026-02-15T16:44:44.929+0000] {connections.py:82} INFO - Подключено к ClickHouse: clickhouse
+[2026-02-15T16:44:44.934+0000] {loader.py:51} INFO - Таблица clients готова
+[2026-02-15T16:44:44.944+0000] {loader.py:60} INFO - Удалены данные схемы variant из clients
+[2026-02-15T16:44:46.364+0000] {loader.py:147} INFO - Загружено 50000/561698
+[2026-02-15T16:44:47.705+0000] {loader.py:147} INFO - Загружено 100000/561698
+[2026-02-15T16:44:48.998+0000] {loader.py:147} INFO - Загружено 150000/561698
+[2026-02-15T16:44:50.335+0000] {loader.py:147} INFO - Загружено 200000/561698
+[2026-02-15T16:44:51.655+0000] {loader.py:147} INFO - Загружено 250000/561698
+[2026-02-15T16:44:53.050+0000] {loader.py:147} INFO - Загружено 300000/561698
+[2026-02-15T16:44:54.459+0000] {loader.py:147} INFO - Загружено 350000/561698
+[2026-02-15T16:44:55.997+0000] {loader.py:147} INFO - Загружено 400000/561698
+[2026-02-15T16:44:57.404+0000] {loader.py:147} INFO - Загружено 450000/561698
+[2026-02-15T16:44:58.817+0000] {loader.py:147} INFO - Загружено 500000/561698
+[2026-02-15T16:45:00.354+0000] {loader.py:147} INFO - Загружено 550000/561698
+[2026-02-15T16:45:00.699+0000] {loader.py:147} INFO - Загружено 561698/561698
+[2026-02-15T16:45:01.878+0000] {loader.py:155} INFO - Таблица clients оптимизирована
+[2026-02-15T16:45:01.912+0000] {universal_etl_factory.py:234} INFO - === LOAD Complete: 561698 строк ===
+[2026-02-15T16:45:02.182+0000] {python.py:201} INFO - Done. Returned value was: {'job_id': 'etl_variant__clients_0e08633b', 'rows_loaded': 561698, 'target_table': 'clients', 'company_id': 'company_002'}
+[2026-02-15T16:45:02.215+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=etl_variant__clients, task_id=load, execution_date=20260215T163339, start_date=20260215T164439, end_date=20260215T164502
+[2026-02-15T16:45:02.241+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2026-02-15T16:45:02.263+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check
