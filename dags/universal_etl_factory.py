@@ -1,11 +1,12 @@
 """
 Universal ETL DAG Factory
 
+- Множество источников данных (MariaDB, PostgreSQL, MSSQL и др.)
 - Разделение на Extract, Transform, Load
 - Parquet-бэкапы (zstd) с хранением 10 дней
-- Parquet для передачи данных между шагами ETL (вместо pickle)
+- Parquet для передачи данных между шагами ETL
 - Системные колонки: _source_schema, _company_id, _loaded_at, _etl_job_id, _row_hash
-- Конфиг: схемы и таблицы описываются по одному разу, DAG'и генерируются автоматически
+- Конфиг: sources, schemas и tables описываются по одному разу
 """
 
 from airflow import DAG
@@ -26,18 +27,24 @@ logger = logging.getLogger(__name__)
 
 def expand_config(raw_config: dict) -> dict:
     """
-    Разворачивает компактный конфиг (schemas + tables) в плоский список table_config'ов.
+    Разворачивает компактный конфиг в плоский список table_config'ов.
 
-    Поддерживает:
-      - schemas_only: [finboon]  — таблица только для указанных схем
-      - schedule на уровне таблицы переопределяет schedule схемы
-      - target_table переопределяет имя целевой таблицы (по умолчанию = table)
+    Новый формат (sources + schemas):
+        sources:      подключения к серверам БД
+        schemas:      схемы, каждая ссылается на source + database
+        tables:       таблицы, разворачиваются на все/указанные схемы
+
+    Каждый table_config получает собственный source_db — полный конфиг подключения
+    к конкретному серверу + database.
+
+    Обратная совместимость: если нет блока schemas — работает старый формат с source_db.
     """
     schemas = raw_config.get('schemas', {})
 
     if not schemas:
         return raw_config
 
+    sources = raw_config.get('sources', {})
     flat_tables = []
 
     for table_def in raw_config.get('tables', []):
@@ -49,6 +56,18 @@ def expand_config(raw_config: dict) -> dict:
                 continue
 
             schema_conf = schemas[schema_name]
+            source_name = schema_conf.get('source')
+
+            if not source_name or source_name not in sources:
+                logger.error(
+                    f"Схема '{schema_name}': source '{source_name}' не найден в sources, пропускаю"
+                )
+                continue
+
+            # Собираем полный source_db для этой схемы:
+            # берём параметры подключения из sources + подставляем database из schema
+            source_conf = sources[source_name].copy()
+            source_conf['database'] = schema_conf.get('database', schema_name)
 
             flat_tables.append({
                 'source_schema': schema_name,
@@ -57,6 +76,7 @@ def expand_config(raw_config: dict) -> dict:
                 'primary_key': table_def['primary_key'],
                 'schedule': table_def.get('schedule', schema_conf.get('schedule', '@daily')),
                 'description': f"{table_def.get('description', table_def['table'])} ({schema_name})",
+                'source_db': source_conf,  # каждый table_config несёт своё подключение
             })
 
     raw_config['companies'] = {
@@ -79,17 +99,21 @@ def extract(table_config: dict, **context) -> dict:
     source_schema = table_config['source_schema']
     source_table = table_config['source_table']
 
+    # Подключение берём из table_config (уже собрано в expand_config)
+    source_db = table_config['source_db']
+
     dag_id = context['dag'].dag_id
     run_id = context['run_id']
     job_id = generate_run_id(dag_id, run_id)
 
     logger.info(f"=== EXTRACT Start ===")
-    logger.info(f"Source: {source_schema}.{source_table}")
+    logger.info(f"Source: {source_db['type']}://{source_db['host']}/{source_db['database']}")
+    logger.info(f"Schema.Table: {source_schema}.{source_table}")
     logger.info(f"Job ID: {job_id}")
 
     TEMP_PATH.mkdir(parents=True, exist_ok=True)
 
-    with source_connection(config['source_db']) as source_conn:
+    with source_connection(source_db) as source_conn:
         extractor = DataExtractor(source_conn, BACKUP_PATH)
 
         columns, rows = extractor.extract(
@@ -141,7 +165,6 @@ def extract(table_config: dict, **context) -> dict:
 def transform(table_config: dict, **context) -> dict:
     """Transform: Читает parquet, анализирует типы, преобразует, пишет parquet"""
     import pyarrow.parquet as pq
-    from etl.utils import load_config
     from etl.type_mapper import TypeMapper
 
     ti = context['ti']
@@ -151,7 +174,8 @@ def transform(table_config: dict, **context) -> dict:
         logger.info("Нет данных для трансформации")
         return {'rows_transformed': 0, 'columns_meta': []}
 
-    config = expand_config(load_config(CONFIG_PATH))
+    # Тип БД берём из table_config
+    source_db = table_config['source_db']
 
     logger.info(f"=== TRANSFORM Start ===")
     logger.info(f"Job ID: {extract_result['job_id']}")
@@ -161,17 +185,13 @@ def transform(table_config: dict, **context) -> dict:
     arrow_table = pq.read_table(extract_parquet)
 
     columns = arrow_table.column_names
-    # Конвертируем Arrow Table → list of tuples
     rows = [
-        tuple(
-            arrow_table.column(col_name)[i].as_py()
-            for col_name in columns
-        )
+        tuple(arrow_table.column(col_name)[i].as_py() for col_name in columns)
         for i in range(arrow_table.num_rows)
     ]
 
     # Анализ типов
-    type_mapper = TypeMapper(config['source_db']['type'])
+    type_mapper = TypeMapper(source_db['type'])
     columns_meta = type_mapper.analyze_columns(columns, rows)
 
     # Преобразование данных
@@ -227,6 +247,7 @@ def load(table_config: dict, **context) -> dict:
     companies = config.get('companies', {})
 
     source_schema = table_config['source_schema']
+    source_db = table_config['source_db']
     target_table = table_config['target_table']
     primary_key = table_config['primary_key']
     company_id = companies.get(source_schema, source_schema)
@@ -247,7 +268,6 @@ def load(table_config: dict, **context) -> dict:
     columns_meta = transform_result['columns_meta']
     col_names = [col['name'] for col in columns_meta]
 
-    # Arrow → list of tuples
     rows = [
         tuple(transform_arrow.column(c)[i].as_py() for c in col_names)
         for i in range(transform_arrow.num_rows)
@@ -259,7 +279,7 @@ def load(table_config: dict, **context) -> dict:
     ]
 
     with clickhouse_connection(config.get('clickhouse', {})) as ch_conn:
-        type_mapper = TypeMapper(config['source_db']['type'])
+        type_mapper = TypeMapper(source_db['type'])
         loader = ClickHouseLoader(ch_conn, type_mapper)
 
         loader.create_table(

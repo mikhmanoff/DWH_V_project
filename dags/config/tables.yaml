@@ -1,31 +1,69 @@
-source_db:
-  type: mariadb
-  host: 10.0.20.2
-  port: 3306
-  database: variant
-  user: readonly_user
-  password: "Qw@t3m@l@7%^&"
+# === Подключения к источникам ===
+sources:
+  mariadb_main:
+    type: mysql
+    host: 10.0.20.3
+    port: 3306
+    user: readonly_user
+    password: "Qw@t3m@l@7%^&"
 
+  # Пример: второй сервер (раскомментировать при необходимости)
+  # mssql_accounting:
+  #   type: mssql
+  #   host: 10.0.20.5
+  #   port: 1433
+  #   user: etl_reader
+  #   password: "S3cur3P@ss!"
+
+  # postgres_crm:
+  #   type: postgresql
+  #   host: 10.0.20.10
+  #   port: 5432
+  #   user: readonly
+  #   password: "PgR3ad0nly"
+
+# === ClickHouse ===
 clickhouse:
   host: clickhouse
   port: 9000
   database: default
 
+# === Настройки ===
 settings:
   backup_enabled: true
   backup_retention_days: 10
   batch_size: 50000
 
-# Схемы и их расписания
+# === Схемы ===
+# Каждая схема ссылается на source и указывает database на этом сервере
 schemas:
   finboon:
+    source: mariadb_main
+    database: finboon
     company_id: "company_001"
     schedule: "0 2 * * *"
+
   variant:
+    source: mariadb_main
+    database: variant
     company_id: "company_002"
     schedule: "0 3 * * *"
 
-# Таблицы описываются ОДИН раз — реплицируются на все схемы
+  # Пример: схема на другом сервере
+  # accounting:
+  #   source: mssql_accounting
+  #   database: accounting_db
+  #   company_id: "company_003"
+  #   schedule: "0 4 * * *"
+
+  # crm:
+  #   source: postgres_crm
+  #   database: crm_prod
+  #   company_id: "company_004"
+  #   schedule: "0 5 * * *"
+
+# === Таблицы ===
+# Описываются ОДИН раз — разворачиваются на все схемы (или только на указанные)
 tables:
   - table: client_contracts
     primary_key: id
@@ -34,3 +72,14 @@ tables:
   - table: clients
     primary_key: id
     description: "Клиенты"
+
+  # Пример: таблица только для одной схемы
+  # - table: invoices
+  #   primary_key: id
+  #   description: "Счета"
+  #   schemas_only: [accounting]
+
+  # - table: leads
+  #   primary_key: id
+  #   description: "Лиды"
+  #   schemas_only: [crm]
